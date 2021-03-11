@@ -40,9 +40,3 @@ export interface PSCResponseBody {
   addresses: never[]
   offices?: Offices[]
 }
-
-export interface SaveEmailResponse {
-  messageId?: string
-  code?: string
-  message?: string
-}
