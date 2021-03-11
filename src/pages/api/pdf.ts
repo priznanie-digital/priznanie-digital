@@ -3,8 +3,9 @@ import hummus from 'hummus'
 import streams from 'memory-streams'
 import { TaxForm } from '../../types/TaxForm'
 import { TaxFormUserInput } from '../../types/TaxFormUserInput'
-import { setDate } from '../../lib/utils'
+import { roundDecimal, setDate } from '../../lib/utils'
 import { calculate } from '../../lib/calculation'
+import Decimal from 'decimal.js'
 
 const FIRST_COLUMN = 31.5
 const BOX_WIDTH = 14.4
@@ -76,7 +77,7 @@ class PdfTemplate {
 
   writeNumberToBoxes(x: number, y: number, number: number, smallGap = false) {
     const [whole, decimal] = number
-      ? `${number.toFixed(2)}`.split('.')
+      ? `${roundDecimal(new Decimal(number))}`.split('.')
       : ['', '']
     const gap = smallGap ? 9 : 15
     this.writeToBoxes(x - whole.length * BOX_WIDTH, y, whole)

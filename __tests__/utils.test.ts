@@ -19,7 +19,11 @@ import {
   validateIbanCountry,
   getRodneCisloAgeAtYearAndMonth,
   parseFullName,
+  boolToString,
+  decimalToString,
+  roundDecimal,
 } from '../src/lib/utils'
+import * as methods from '../src/lib/utils'
 import Decimal from 'decimal.js'
 
 describe('utils', () => {
@@ -56,8 +60,16 @@ describe('utils', () => {
   })
 
   describe('#formatCurrency', () => {
-    it('should format number', () => {
-      expect(formatCurrency(1234.564)).toBe('1 234,56 EUR')
+    const scenarios = [
+      { input: 1234.564, output: '1 234,56 EUR' },
+      { input: 123.455, output: '123,46 EUR' },
+      { input: 1000000, output: '1 000 000,00 EUR' },
+    ]
+
+    scenarios.forEach(({ input, output }) => {
+      it(`should format ${input} to ${output}`, () => {
+        expect(formatCurrency(input)).toBe(output)
+      })
     })
   })
 
@@ -381,6 +393,60 @@ describe('utils', () => {
       it(`should return "${output}" for "${input}"`, () => {
         expect(parseStreetAndNumber(input)).toEqual(output)
       })
+    })
+  })
+  describe('#boolToString', () => {
+    it('should return 1', () => {
+      expect(boolToString(true)).toBe('1')
+    })
+
+    it('should return 0', () => {
+      expect(boolToString(false)).toBe('0')
+    })
+  })
+
+  describe('#decimalToString', () => {
+    it('should return empty string for zero', () => {
+      expect(decimalToString(new Decimal(0))).toBe('')
+    })
+
+    it('should return rounded number to 2 decimals', () => {
+      const roundSpy = jest.spyOn(methods, 'roundDecimal')
+      const input = new Decimal(3)
+      decimalToString(input)
+      expect(roundSpy).toHaveBeenCalledWith(input)
+    })
+  })
+
+  describe('#roundDecimal', () => {
+    const scenarios = [
+      { input: new Decimal(123.45), output: '123.45' },
+      { input: new Decimal(123.4509), output: '123.45' },
+      { input: new Decimal(123.451), output: '123.45' },
+      { input: new Decimal(123.454), output: '123.45' },
+      { input: new Decimal(123.455), output: '123.46' },
+      { input: new Decimal(123.454449), output: '123.46' },
+      { input: new Decimal(123.459), output: '123.46' },
+      { input: new Decimal(123.46), output: '123.46' },
+      { input: new Decimal(123.461), output: '123.46' },
+      { input: new Decimal(123.464), output: '123.46' },
+      { input: new Decimal(123.465), output: '123.47' },
+      { input: new Decimal(123.466), output: '123.47' },
+      { input: new Decimal(123.469), output: '123.47' },
+    ]
+
+    scenarios.forEach(({ input, output }) => {
+      it(`should round ${input} to ${output}`, () => {
+        expect(roundDecimal(new Decimal(123.455))).toBe('123.46')
+      })
+    })
+
+    it('should roundDecimal to 2 decimal places by default', () => {
+      expect(roundDecimal(new Decimal(10))).toBe('10.00')
+    })
+
+    it('should roundDecimal to 0 decimal places', () => {
+      expect(roundDecimal(new Decimal(10.9), 0)).toBe('11')
     })
   })
 })
