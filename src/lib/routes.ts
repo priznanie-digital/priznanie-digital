@@ -25,7 +25,7 @@ export type Route =
   | '/suhrn'
   | '/iban'
   | '/vysledky'
-  | '/stiahnut'
+  | '/pokracovat'
 
 export const getOrderedRoutes = (taxForm: TaxForm): ReadonlyArray<Route> => {
   const getChildRoute = (): Route[] => {
@@ -54,7 +54,7 @@ export const getOrderedRoutes = (taxForm: TaxForm): ReadonlyArray<Route> => {
     '/suhrn',
     ...getIbanRoute(),
     '/vysledky',
-    '/stiahnut',
+    '/pokracovat',
   ]
 }
 
@@ -92,14 +92,14 @@ export type PostponeRoute =
   | '/odklad/prijmy-zo-zahranicia'
   | '/odklad/osobne-udaje'
   | '/odklad/suhrn'
-  | '/odklad/stiahnut'
+  | '/odklad/pokracovat'
 
 const postponeRoutesOrder: ReadonlyArray<PostponeRoute> = [
   postponeHomeRoute,
   '/odklad/prijmy-zo-zahranicia',
   '/odklad/osobne-udaje',
   '/odklad/suhrn',
-  '/odklad/stiahnut',
+  '/odklad/pokracovat',
 ]
 
 export const getPostponeRoutes = (currentRoute: PostponeRoute) => {
@@ -127,7 +127,7 @@ export const validateRoute = (
       const requirements = {
         '/odklad/osobne-udaje': 'prijmy_zo_zahranicia',
         '/odklad/suhrn': 'priezvisko',
-        '/odklad/stiahnut': 'priezvisko',
+        '/odklad/pokracovat': 'priezvisko',
       }
       requirement = requirements[router.route]
       value = postponeUserInput[requirement]
@@ -150,7 +150,7 @@ export const validateRoute = (
         '/suhrn': 'r004_priezvisko',
         '/vysledky': 'r004_priezvisko',
         '/iban': 'r004_priezvisko',
-        '/stiahnut': 'r004_priezvisko',
+        '/pokracovat': 'r004_priezvisko',
       }
       requirement = requirements[router.route]
       value = taxFormUserInput[requirement]

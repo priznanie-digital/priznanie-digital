@@ -1,10 +1,17 @@
 import React from 'react'
-import Link from 'next/link'
 import { NextPage } from 'next'
 import { getPostponeRoutes } from '../../lib/routes'
 import { PostponeUserInput } from '../../types/PostponeUserInput'
 import { BackLink } from '../../components/BackLink'
-import { PostponeEmailForm } from '../../components/PostponeEmailForm'
+import { EmailUserInput } from '../../types/UserInput'
+import { FormErrors } from '../../types/PageUserInputs'
+import { Form } from 'formik'
+import {
+  CheckboxSmall,
+  FormWrapper,
+  Input,
+} from '../../components/FormComponents'
+import { useRouter } from 'next/router'
 
 const { nextRoute, previousRoute } = getPostponeRoutes('/odklad/suhrn')
 
@@ -16,6 +23,8 @@ const Suhrn: NextPage<Props> = ({
   postponeUserInput,
   setPostponeUserInput,
 }: Props) => {
+  const router = useRouter()
+
   return (
     <>
       <BackLink href={previousRoute} />
@@ -103,39 +112,53 @@ const Suhrn: NextPage<Props> = ({
         </tbody>
       </table>
 
-      <div className="box">
-        {postponeUserInput.email ? (
-          <p>
-            Na Váš email <strong>{postponeUserInput.email}</strong> sme odoslali
-            XML súbor potrebný pre odklad dane.
-            <br />
-            {postponeUserInput.newsletter && ' Pošleme vám aj newsletter.'}
-          </p>
-        ) : (
-          <PostponeEmailForm
-            postponeUserInput={postponeUserInput}
-            saveForm={(email, newsletter) => {
-              setPostponeUserInput({ ...postponeUserInput, email, newsletter })
-            }}
-            params={{
-              form: 'postpone',
-              firstname: postponeUserInput.meno,
-              lastname: postponeUserInput.priezvisko,
-              deadline: postponeUserInput.prijmy_zo_zahranicia
-                ? '30. september 2021'
-                : '30. jún 2021',
-            }}
-          />
+      <FormWrapper<EmailUserInput>
+        initialValues={postponeUserInput}
+        validate={validate}
+        onSubmit={(values) => {
+          setPostponeUserInput({ ...postponeUserInput, ...values })
+          router.push(nextRoute)
+        }}
+      >
+        {() => (
+          <Form className="form" noValidate>
+            <div className="box">
+              <Input
+                name="email"
+                type="email"
+                label="Pošleme vám tento výpočet dane na email?"
+                hint="Bude sa vám hodiť pri úhrade daní"
+                placeholder="váš email"
+              />
+              <CheckboxSmall
+                name="newsletter"
+                label="Mám záujem o zasielanie informačného newslettera s praktickými radami pre živnostníkov"
+              />
+            </div>
+            <button
+              data-test="next"
+              className="govuk-button govuk-!-margin-top-3"
+              type="submit"
+            >
+              Pokračovať
+            </button>
+          </Form>
         )}
-      </div>
-
-      <Link href={nextRoute}>
-        <button className="govuk-button govuk-!-margin-top-4" type="button">
-          Pokračovať
-        </button>
-      </Link>
+      </FormWrapper>
     </>
   )
+}
+
+export const validate = (values: EmailUserInput) => {
+  const errors: Partial<FormErrors<EmailUserInput>> = {}
+
+  if (values.email && !values.email.match(/^.+@.+\.[a-z]+$/i)) {
+    errors.email = 'Nesprávny formát emailovej adresy'
+  } else if (values.newsletter && !values.email) {
+    errors.email = 'Zadajte emailovú adresu'
+  }
+
+  return errors
 }
 
 export default Suhrn

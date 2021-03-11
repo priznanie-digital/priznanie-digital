@@ -123,6 +123,7 @@ export const initTaxFormUserInputValues: TaxFormUserInput = {
   ...spaInitialInput,
   ...taxBonusInitialInput,
   ...{ datum: '' },
+  ...{ email: '' },
 }
 
 export const initialPostponeUserInput: PostponeUserInput = {
